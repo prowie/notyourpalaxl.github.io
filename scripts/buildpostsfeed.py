@@ -14,7 +14,7 @@ from urllib.parse import quote, urljoin
 REPOROOT = Path(__file__).resolve().parents[1]
 POSTSROOT = REPOROOT / "posts"
 OUTPUTFILE = REPOROOT / "posts.xml"
-URL = "http://www.notyourpalaxl.com"  # No trailing slash
+URL = "http://www.yourpalaxl.com"  # No trailing slash
 
 
 class TitleParser(HTMLParser):
