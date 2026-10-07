@@ -1,5 +1,4 @@
 name: Callie Online RSS
-
 on:
   push:
     branches:
@@ -7,78 +6,33 @@ on:
     paths-ignore:
       - "feed.xml"
   workflow_dispatch:
-
 permissions:
   contents: write
-
 concurrency:
   group: callie-online-rss-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   buildfeed:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
-
       - name: Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-
       - name: Build feed
-        run: |
-          python scripts/buildfeed.py
-
-          echo "Working directory:"
-          pwd
-
-          echo "Generated feed:"
-          ls -la feed.xml
-
-          echo "First 20 lines:"
-          head -n 20 feed.xml
-
+        run: python scripts/buildfeed.py
       - name: Commit feed
         run: |
-          echo "Current branch:"
-          git branch --show-current
-
-          echo "Current commit:"
-          git log -1 --oneline
-
-          echo "Git status before staging:"
-          git status --short --untracked-files=all
-
-          echo "Is feed.xml already tracked in HEAD?"
-          if git cat-file -e HEAD:feed.xml 2>/dev/null; then
-            echo "YES: feed.xml already exists in the checked-out commit."
-            echo "Existing feed.xml in HEAD:"
-            git show HEAD:feed.xml | head -n 20
-          else
-            echo "NO: feed.xml does not exist in the checked-out commit."
-          fi
-
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f feed.xml
-
-          echo "Git status after staging:"
-          git status --short
-
-          echo "Staged files:"
-          git diff --cached --name-status
-
-          if git diff --cached --quiet -- feed.xml; then
-            echo "feed.xml is identical to the version already in HEAD."
+          if git diff --cached --quiet; then
+            echo "feed file exists"
             exit 0
           fi
-
           git commit -m "Update Callie Online RSS"
-          git push origin HEAD:main
+          git push
