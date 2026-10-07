@@ -163,7 +163,6 @@ def main() -> None:
         ET.SubElement(item, "link").text = postUrl
         ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = postUrl
         ET.SubElement(item, "pubDate").text = format_datetime(postDate)
-        ET.SubElement(item, "author").text = "Axl Woodland"
 
         if body:
             ET.SubElement(item, "description").text = body

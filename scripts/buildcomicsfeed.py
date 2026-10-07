@@ -86,7 +86,6 @@ def main() -> None:
         ET.SubElement(item, "link").text = url
         ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = url
         ET.SubElement(item, "pubDate").text = format_datetime(published, usegmt=True)
-        ET.SubElement(item, "author").text = "Axl Woodland"
         desc = (
             f'<p><a href="{html.escape(url, quote=True)}">'
             f'<img src="{html.escape(url, quote=True)}" '
