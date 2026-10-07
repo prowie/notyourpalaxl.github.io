@@ -5,7 +5,13 @@
     <link>http://www.yourpalaxl.com/callie_online/</link>
     <description>The Vionan Route Of The Information Superhighway</description>
     <language>en-gb</language>
+    <webMaster>Axl Woodland</webMaster>
+    <managingEditor>Axl Woodland</managingEditor>
     <atom:link href="http://www.yourpalaxl.com/callie_online/callie_online/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:author>
+      <atom:name>Axl Woodland</atom:name>
+      <atom:email>axl@example.com</atom:email>
+    </atom:author>
     <lastBuildDate>Wed, 07 Oct 2026 06:05:48 GMT</lastBuildDate>
     <item>
       <title>Thunderbirdtoast 5D388C1349709B37 1216243 0</title>
