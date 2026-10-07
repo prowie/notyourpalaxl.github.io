@@ -73,7 +73,12 @@ def main() -> None:
     ET.SubElement(channel, "link").text = URL + "/"
     ET.SubElement(channel, "description").text = "The Vionan Route Of The Information Superhighway"
     ET.SubElement(channel, "language").text = "en-gb"
+    ET.SubElement(channel, "webMaster").text = "Axl Woodland"
+    ET.SubElement(channel, "managingEditor").text = "Axl Woodland"
     ET.SubElement(channel, "atom:link", { "href": URL + "/callie_online/feed.xml", "rel": "self", "type": "application/rss+xml" } )
+    author = ET.SubElement(channel, "atom:author")
+    ET.SubElement(author, "atom:name").text = "Axl Woodland"
+    ET.SubElement(author, "atom:email").text = "axl@example.com"
 
     if comics:
         ET.SubElement(channel, "lastBuildDate").text = format_datetime(max(date for date, _ in comics), usegmt=True)
