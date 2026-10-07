@@ -9,7 +9,7 @@ from datetime import datetime
 from email.utils import format_datetime
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 REPOROOT = Path(__file__).resolve().parents[1]
 POSTSROOT = REPOROOT / "posts"
@@ -44,7 +44,7 @@ class TitleParser(HTMLParser):
 
 
 def getGitDate(path: Path) -> datetime:
-    """Return the file's first Git author date, including its time and offset."""
+    """Return the file's first Git author date, including time and offset."""
     relativePath = path.relative_to(REPOROOT).as_posix()
     commands = [
         ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relativePath],
@@ -61,20 +61,18 @@ def getGitDate(path: Path) -> datetime:
         )
         dates = [line.strip() for line in result.stdout.splitlines() if line.strip()]
         if dates:
-            # git log is newest-first, so the final result is the oldest.
             return datetime.fromisoformat(dates[-1])
 
     return datetime.fromtimestamp(path.stat().st_mtime).astimezone()
 
 
 def getPostDate(path: Path) -> datetime:
-    """Use DDMMYY from the filename and time/timezone from the first Git date."""
+    """Use DDMMYY from the filename and time/offset from the first Git date."""
     if not re.fullmatch(r"\d{6}", path.stem):
         raise ValueError("filename must be a six-digit date in DDMMYY format")
 
     fileDate = datetime.strptime(path.stem, "%d%m%y")
     gitDate = getGitDate(path)
-
     return datetime(
         year=fileDate.year,
         month=fileDate.month,
@@ -86,17 +84,17 @@ def getPostDate(path: Path) -> datetime:
     )
 
 
-def getPostTitle(path: Path) -> str:
-    """Read the first title element, falling back to the filename if absent."""
-    parser = TitleParser()
-
-    # utf-8-sig accepts both ordinary UTF-8 and UTF-8 with a BOM.
+def readPostSource(path: Path) -> str:
+    """Read modern UTF-8 pages and older Windows-1252 pages."""
     try:
-        source = path.read_text(encoding="utf-8-sig")
+        return path.read_text(encoding="utf-8-sig")
     except UnicodeDecodeError:
-        # Some older hand-authored pages may use Windows-1252.
-        source = path.read_text(encoding="windows-1252")
+        return path.read_text(encoding="windows-1252")
 
+
+def getPostTitle(source: str, path: Path) -> str:
+    """Read the first title element, falling back to the filename."""
+    parser = TitleParser()
     parser.feed(source)
     parser.close()
     return parser.getTitle() or path.stem
@@ -107,7 +105,32 @@ def getPublicURL(path: Path) -> str:
     return f"{URL}/{quote(relativePath, safe='/')}"
 
 
+def getPostBody(source: str, postUrl: str) -> str:
+    """Return HTML inside body and make common relative URLs absolute."""
+    bodyStart = re.search(r"<body\b[^>]*>", source, flags=re.IGNORECASE)
+    if not bodyStart:
+        return ""
+
+    remainingSource = source[bodyStart.end():]
+    bodyEnd = re.search(r"</body\s*>", remainingSource, flags=re.IGNORECASE)
+    body = remainingSource[:bodyEnd.start()] if bodyEnd else remainingSource
+
+    def makeAbsolute(match: re.Match[str]) -> str:
+        attribute, quoteMark, value = match.groups()
+        absoluteUrl = urljoin(postUrl, html.unescape(value))
+        escapedUrl = html.escape(absoluteUrl, quote=True)
+        return f"{attribute}={quoteMark}{escapedUrl}{quoteMark}"
+
+    body = re.sub(
+        r"(?i)\b(href|src|poster|background)\s*=\s*([\"'])(.*?)\2",
+        makeAbsolute,
+        body,
+    )
+    return body.strip()
+
+
 def addIndent(element: ET.Element, level: int = 0) -> None:
+    """Add indentation to make the generated XML readable."""
     spacing = "\n" + "  " * level
     if len(element):
         if not element.text or not element.text.strip():
@@ -121,31 +144,30 @@ def addIndent(element: ET.Element, level: int = 0) -> None:
 
 
 def main() -> None:
-    posts: list[tuple[datetime, Path, str]] = []
+    posts: list[tuple[datetime, Path, str, str]] = []
 
     if POSTSROOT.exists():
-        # Only include .htm and .html files directly inside /posts.
         for path in POSTSROOT.iterdir():
             if not path.is_file() or path.suffix.lower() not in {".htm", ".html"}:
                 continue
 
             try:
                 postDate = getPostDate(path)
-                postTitle = getPostTitle(path)
+                postUrl = getPublicURL(path)
+                source = readPostSource(path)
+                postTitle = getPostTitle(source, path)
+                postBody = getPostBody(source, postUrl)
             except (ValueError, OSError) as error:
                 print(f"Skipping {path.relative_to(REPOROOT)}: {error}")
                 continue
 
-            posts.append((postDate, path, postTitle))
+            posts.append((postDate, path, postTitle, postBody))
 
     posts.sort(key=lambda entry: (entry[0], entry[1].as_posix()), reverse=True)
 
     rss = ET.Element(
         "rss",
-        {
-            "version": "2.0",
-            "xmlns:atom": "http://www.w3.org/2005/Atom",
-        },
+        {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"},
     )
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = "Not Your Pal Axl Posts"
@@ -163,20 +185,25 @@ def main() -> None:
     )
 
     if posts:
-        newestDate = max(postDate for postDate, _, _ in posts)
+        newestDate = max(postDate for postDate, _, _, _ in posts)
         ET.SubElement(channel, "lastBuildDate").text = format_datetime(newestDate)
 
-    for postDate, path, title in posts:
-        url = getPublicURL(path)
+    for postDate, path, title, body in posts:
+        postUrl = getPublicURL(path)
         item = ET.SubElement(channel, "item")
         ET.SubElement(item, "title").text = title
-        ET.SubElement(item, "link").text = url
-        ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = url
+        ET.SubElement(item, "link").text = postUrl
+        ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = postUrl
         ET.SubElement(item, "pubDate").text = format_datetime(postDate)
-        ET.SubElement(item, "description").text = (
-            f'<p><a href="{html.escape(url, quote=True)}">'
-            f'Read {html.escape(title)}</a></p>'
-        )
+
+        if body:
+            ET.SubElement(item, "description").text = body
+        else:
+            escapedUrl = html.escape(postUrl, quote=True)
+            escapedTitle = html.escape(title)
+            ET.SubElement(item, "description").text = (
+                f'<p><a href="{escapedUrl}">Read {escapedTitle}</a></p>'
+            )
 
     addIndent(rss)
     xmlBody = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
