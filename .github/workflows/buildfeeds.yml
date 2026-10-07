@@ -13,7 +13,7 @@ concurrency:
   group: rssfeeds-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  buildfeed:
+  buildfeeds:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
