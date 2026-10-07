@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import annotations
-
 import html
 import re
 import subprocess
@@ -12,13 +10,13 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 REPOROOT = Path(__file__).resolve().parents[1]
-URL = "http://www.yourpalaxl.com/callie_online" # No trailing / here
+URL = "http://www.yourpalaxl.com/callie_online" # No trailing /
 
 def getFileDate(path: Path) -> datetime:
-    relativePath = path.relative_to(REPOROOT).as_posix()
+    relative = path.relative_to(REPOROOT).as_posix()
     cmds = [
-        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relativePath],
-        ["git", "log", "--follow", "--format=%aI", "--", relativePath],
+        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relative],
+        ["git", "log", "--follow", "--format=%aI", "--", relative],
     ]
 
     for command in cmds:
@@ -59,9 +57,9 @@ def addIdent(element: ET.Element, level: int = 0) -> None: # gotta have pretty f
 
 def main() -> None:
     comics = []
-    ARCHIVEROOT = REPOROOT / "callie_online" / "archive"
-    if ARCHIVEROOT.exists():
-        for path in ARCHIVEROOT.rglob("printable/*"):
+    archiveRoot = REPOROOT / "callie_online" / "archive"
+    if archiveRoot.exists():
+        for path in archiveRoot.rglob("printable/*"):
             if path.is_file() and path.suffix.lower() in {".gif", ".png", ".jpg"}:
                 comics.append((getFileDate(path), path))
 
@@ -95,17 +93,11 @@ def main() -> None:
         )
         ET.SubElement(item, "description").text = desc
         ET.SubElement(item, "enclosure", { "url": url, "length": str(path.stat().st_size), "type": getMimeType(path) })
-
     addIdent(rss)
     xml_body = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
     outputFile = REPOROOT / "callie_online" / "feed.xml"
-    outputFile.write_text(
-        '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    outputFile.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body + "\n", encoding="utf-8", newline="\n")
     print(f"Gen: {len(comics)}")
-
 
 if __name__ == "__main__":
     main()

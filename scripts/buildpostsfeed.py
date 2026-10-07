@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
 
 import html
 import re
@@ -12,7 +11,7 @@ from pathlib import Path
 from urllib.parse import quote, urljoin
 
 REPOROOT = Path(__file__).resolve().parents[1]
-URL = "http://www.yourpalaxl.com"  # No trailing slash
+URL = "http://www.yourpalaxl.com"  # No trailing
 
 class TitleParser(HTMLParser):
     def __init__(self) -> None:
@@ -38,10 +37,10 @@ class TitleParser(HTMLParser):
         return " ".join("".join(self.titleParts).split())
 
 def getGitDate(path: Path) -> datetime:
-    relativePath = path.relative_to(REPOROOT).as_posix()
+    relative = path.relative_to(REPOROOT).as_posix()
     cmds = [
-        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relativePath],
-        ["git", "log", "--follow", "--format=%aI", "--", relativePath],
+        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relative],
+        ["git", "log", "--follow", "--format=%aI", "--", relative],
     ]
 
     for command in cmds:
@@ -116,9 +115,9 @@ def addIndent(element: ET.Element, level: int = 0) -> None: # gotta have pretty 
 
 def main() -> None:
     posts: list[tuple[datetime, Path, str, str]] = []
-    POSTSROOT = REPOROOT / "posts"
-    if POSTSROOT.exists():
-        for path in POSTSROOT.iterdir():
+    postsRoot = REPOROOT / "posts"
+    if postsRoot.exists():
+        for path in postsRoot.iterdir():
             if not path.is_file() or path.suffix.lower() not in {".htm", ".html"}:
                 continue
             try:
@@ -137,7 +136,7 @@ def main() -> None:
     rss = ET.Element("rss", {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = "Axl's Cyberspace"
-    ET.SubElement(channel, "link").text = URL + "/posts/"
+    ET.SubElement(channel, "link").text = URL + "/assets/Body/bodynews.htm"
     ET.SubElement(channel, "description").text = "Live from the Cerestix System"
     ET.SubElement(channel, "language").text = "en-gb"
     ET.SubElement(channel, "atom:link", {"href": URL + "/posts.xml", "rel": "self", "type": "application/rss+xml" })
@@ -161,20 +160,13 @@ def main() -> None:
         else:
             escapedUrl = html.escape(postUrl, quote=True)
             escapedTitle = html.escape(title)
-            ET.SubElement(item, "description").text = (
-                f'<p><a href="{escapedUrl}">Read {escapedTitle}</a></p>'
-            )
+            ET.SubElement(item, "description").text = (f'<p><a href="{escapedUrl}">{escapedTitle}</a></p>')
 
     addIndent(rss)
     xmlBody = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
-    OUTPUTFILE = REPOROOT / "posts.xml"
-    OUTPUTFILE.write_text(
-        '<?xml version="1.0" encoding="UTF-8"?>\n' + xmlBody + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
-    print(f"Generated posts.xml with {len(posts)} post(s).")
-
+    outputFile = REPOROOT / "posts.xml"
+    outputFile.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + xmlBody + "\n", encoding="utf-8", newline="\n")
+    print(f"Gen: {len(posts)}")
 
 if __name__ == "__main__":
     main()
