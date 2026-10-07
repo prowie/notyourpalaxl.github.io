@@ -1,0 +1,135 @@
+<title>Axl's Cyberspace - Making a private file sharing network (Update)</title>
+<body link="#FF6600" vlink="#800080" alink="#0000FF" style="border:1px solid #FF6600; font-family: Arial" text="#FFFFFF" bgcolor="#000000">
+
+<p><i><font face="Arial Black" size="7">News</font></i></p>
+<p><i><font face="Arial Black" color="#FF6600">Making a private file sharing 
+network (Update) - Entry 
+Date: 21st April 2026</font></i></p>
+<p><i>This is an update to &quot;<a href="140625.htm">Making a private file sharing 
+network</a>&quot; written on 14th June 2025.</i></p>
+<p>It sure has been a while since I made my post about making a file sharing 
+network. Almost an entire year later, I've finally done it, but <br>
+not exactly like 
+I described in the post.
+Let's start with the first difference. I may have mentioned that I was going 
+to get an Orange <br>
+Livebox router. That later turned out to not be true. I instead had a good look, and
+aimed my sights at the Orange Brightbox wireless <br>
+router 
+from 2012. You may be wondering why I picked that one. I'll be happy to answer 
+that.</p>
+<p><img border="0" src="assets/SP_A0369.jpg" width="396" height="300"></p>
+<p>This because compared to the Livebox (1 LAN, 1 WAN), The Brightbox 
+has more Ethernet ports (3 LAN, 1 WAN). This will obviously <br>
+allow for users to 
+plug in multiple devices
+via Ethernet. The second is that it also seems to be of a significantly smaller 
+size than the <br>
+Livebox. It's a little bit smaller than a standard DVD case, and 
+this can be great for space saving.</p>
+<p><img border="0" src="assets/2104261.jpg"><img border="0" src="assets/SP_A0388.jpg" width="220" height="168"></p>
+<p><b><i><font size="2" color="#FF6600">(Left: Livebox Ethernet Ports, Right: Rear of Brightbox 
+router)</font></i></b></p>
+<p>The Brightbox is a basic router, but that's literally all I need. All I 
+needed was a basic router for local-only networking. Both the Livebox <br>
+and the 
+Brightbox fit that criteria perfectly.
+I only chose the Brightbox for its smaller size and the extra ports. This thing 
+was brand new <br>
+too, and came boxed.</p>
+<p><img border="0" src="assets/SP_A0396.jpg" width="229" height="176"><img border="0" src="assets/SP_A0402.jpg" width="236" height="176"><img border="0" src="assets/SP_A0399.jpg" width="235" height="176"></p>
+<p>...Also, yes. There's this graphic in the instruction manual of a cuppa and a 
+custard cream and it never fails to make me crave that exact thing.</p>
+<p><img border="0" src="assets/2104262.jpg" width="151" height="154"></p>
+<p>After around about a day, I had also started experimenting, and by day 3, I 
+had actually managed to figure out how to get the thing back <br>
+online, but not via 
+ADSL, but instead
+utilising my own server. (...And no, I don't mean copies of web pages, I mean 
+ACTUALLY online.)</p>
+<p>First, I went ahead about exploring the gateway config pages, and changing 
+things to my liking. I had set up things such as local IP <br>
+reservations via the DHCP settings, passwords, and the like.</p>
+<p><img border="0" src="assets/2104263.jpg" width="402" height="284"><img border="0" src="assets/2104264.jpg" width="382" height="286"></p>
+<p><b><font color="#FF6600" size="2"><i>For privacy and safety reasons, some 
+data in these screenshots have been redacted.</i></font></b></p>
+<p>I had also figured out that it is indeed possible to access a manufactory 
+telnet system. You must have to reset it to the manufactory <br>
+defaults in order to 
+access it though.
+To do it, sign into your Brightbox gateway. I recommend at this stage, you take 
+a backup of <br>
+your current settings just in case things go wrong. You can do this 
+via&nbsp;&quot;advanced set up &gt; tools &gt; configuration &gt; backup&quot;. This 
+<br>
+should have a 
+backup BIN file get downloaded to your PC. Keep it safe. Once that's done, 
+insert the following
+into your URL bar. <br>
+(Make sure the 192.168.1.1 address is whatever gateway you've 
+configured your Brightbox to be)</p>
+<p><img border="0" src="assets/2104262.gif"></p>
+<p>Afterwards, you should get greeted with this screen. Press &quot;manufactory 
+default&quot;. Wait for your Brightbox to sort itself out afterwards. <br>
+It also goes to 
+say that you should
+be connected via Ethernet during this time. Manufactory mode should give you 
+access to your <br>
+Brightbox's root terminal. Try to connect to it via 
+192.168.1.1:23.
+Bare in mind, that when I was in this mode, I did lose all internet <br>
+connectivity 
+etc.<br>
+<br>
+<i><font color="#FF6600" size="2"><b>Warning: In my experience, attempting to 
+reconfigure settings or restore from backup either didn't work, or just straight 
+away locked me out of the <br>
+telnet stuff.</b></font></i></p>
+<p><img border="0" src="assets/2104265.jpg" width="506" height="381"></p>
+<p>Now for the main event:</p>
+<p>Just how did I get this router back on the information superhighway all these 
+years later, and without ADSL? It's somewhat <br>
+simple: The WAN port. I had figured
+this out accidentally when playing with network bridges in Windows 7. I would 
+give <br>
+ADSL a shot, but my doubts that it would work are extreme. Not only does
+Orange not exist in the UK anymore, but even <br>
+if they did, I wouldn't have 
+credentials to get online anyway.</p>
+<p>...Plus I'm pretty sure the DSL/Phone sockets are already in use.</p>
+<p><img border="0" src="assets/2104264.gif"></p>
+<p><b><font color="#FF6600" size="2"><i>For privacy and safety reasons, some 
+data in these screenshots have been redacted.</i></font></b></p>
+<p>Now it goes without saying this, but you are screwing with router settings. 
+Take a backup (instructions are higher up) first.</p>
+<p>Now this is not entirely a plug-and-play thing. Some tiny reconfigs are 
+required. You must switch your broadband type from <br>
+ADSL to Ethernet.
+You can do this by going to &quot;basic set-up &gt; broadband settings&quot;. At the top of 
+the list, you should see two <br>
+radio buttons with a &quot;Broadband Type:&quot; label.
+The options are &quot;ADSL&quot; and &quot;Ethernet&quot; change this from ADSL to Ethernet. 
+<br>
+The 
+options available should change.
+(E.G: Broadband Username/Password vanishing.) Don't worry about this. These 
+options<br>
+are only needed for ADSL and are thus not required for an Ethernet-based 
+configuration.</p>
+<p>...and that's it for the router configuration! Now it's time to configure the 
+server to output your internet connection to the router.<br>
+Plug in your Ethernet cable into your server, and port 4 of the Brightbox. This 
+is the WAN port, literally indicated by the red WAN<br>
+label above. On the server, depending on the operating system, the bridge 
+creation method is different. My server runs a linux-based<br>
+system. I took the path of least resistance and just did it through a desktop 
+GUI and set it up to be automatic. I couldn't figure<br>
+out how to do it with the terminal. Once that's done, all the rest should be 
+plug-and-play. Test it on a device other than your server like a<br>
+tablet. Try going to the gateway (don't have to sign in), and then try going to 
+a website. If it works, then obviously it works.</p>
+<p><a href="../assets/Body/bodynews.htm">Other News...</a></p>
+
+<p>&nbsp;</p>
+
+

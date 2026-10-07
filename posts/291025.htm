@@ -1,0 +1,68 @@
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Axl&#39;s Cyberspace - I got an iPod, and you should too. (Update)</title>
+</head>
+
+<body link="#FF6600" vlink="#800080" alink="#0000FF" style="border:1px solid #FF6600; font-family: Arial" text="#FFFFFF" bgcolor="#000000">
+
+<p><i><font face="Arial Black" size="7">News</font></i></p>
+<p><i><font face="Arial Black" color="#FF6600">I got an iPod, and you should 
+too. (Update) - Entry Date:&nbsp; 29th October 2025</font></i></p>
+<p>This is an update to the post that I had made on the 9th of this month. You 
+can read that <a href="091025.htm">here</a>.</p>
+<p>The flash mod, after a few hurdles, went great. The battery somehow works 
+completely fine, and replacement was not needed. Even after almost daily 
+testing, it lasted a LONG while. The iPod now has 64 GB. Even with my 200+ 
+songs, it&#39;s barely even taken up any storage. I absolutely love using the iPod 
+to listen to music. I even got into a little bit of system font and graphic 
+modification too, using iPodWizard.</p>
+<p>The flash mod hardware that I had purchased was the generic IDE to Compact 
+Flash adapter. It wasn&#39;t that rectangular one though. It has the two top corners 
+(Closest to the IDE connector cut off diagonally. Alongside, I had also 
+purchased a Compact Flash to Dual Micro SD adapter with a red label. Other 
+places online recommend against using this, as it makes restoring the iPod 
+firmware difficult. I found this out the hard way. </p>
+<p>When I installed the flash mod, it connected up just fine. iTunes had 
+detected it as an iPod in need of a restore. The restore went swimmingly! ...Or 
+so I thought. After the restore &quot;completed&quot;, the iPod would reboot. However, the 
+strange thing was that iTunes would then suddenly report the iPod as being 
+corrupted. Windows would also list it as an unformatted drive. The iPod itself 
+would start up with the folder error screen instead of the connect to wall 
+outlet screen. I had tried these things, that didn&#39;t end up working:</p>
+<ul>
+	<li>Retrying the restore a few times (Same result)</li>
+	<li>Using a partition manager to recreate the Master Boot Record (Failed)</li>
+	<li>Cloning the original iPod hard drive to the SD Card with the computer 
+	(Failed)</li>
+	<li>Using Slot 2 on the adapter instead of Slot 1 (Failed)</li>
+	<li>Force formatting the iPod to FAT32 (Failed)</li>
+</ul>
+<p>I had tried all of these several times without luck. I was about to give up, 
+then I came across an obscure tutorial on YouTube. Credits go to the video 
+poster. I will still put instructions here just in case you don&#39;t wish the watch 
+a YouTube video.&nbsp; This has been tested by me and worked for my 4th 
+Generation iPod Monochrome.</p>
+<ul>
+	<li>Step 1: Restore the iPod as normal. When Windows reports that the drive 
+	needs to be formatted, or iTunes reports the iPod is corrupted, just simply 
+	ignore and close them.</li>
+	<li>Insert the SD Card or adapter into a reader of your choice. I am not 
+	sure if it will work with the iPod directly, or in disk mode.</li>
+	<li>Use a hex editor program that supports drive editing (I myself had used 
+	Victoria)</li>
+	<li>Load the iPod&#39;s flash storage into your desired editor and change the 
+	first byte from EB to 00.</li>
+	<li>Reinsert the drive into the iPod and reboot it. Do this by holding Menu 
+	and the Middle Button until the screen shuts off.</li>
+	<li>Your iPod should hopefully now display the plug into outlet screen 
+	instead of that dastardly folder error screen.</li>
+</ul>
+<p>I hope your iPod experience goes swimmingly! Good luck!</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><a href="../assets/Body/bodynews.htm">Other News...</a></p>
+
+<p>&nbsp;</p>
+
+
