@@ -6,6 +6,9 @@
     <description>Live from the Cerestix System</description>
     <language>en-gb</language>
     <atom:link href="http://www.yourpalaxl.com/posts.xml" rel="self" type="application/rss+xml" />
+    <atom:author>
+      <atom:name>Axl Woodland</atom:name>
+    </atom:author>
     <lastBuildDate>Tue, 06 Oct 2026 01:17:04 -0400</lastBuildDate>
     <item>
       <title>Say Hello To Callie, I got a proper domain too!</title>
