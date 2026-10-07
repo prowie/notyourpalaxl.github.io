@@ -12,7 +12,7 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 REPOROOT = Path(__file__).resolve().parents[1]
-URL = "http://www.yourpalaxl.com" # No trailing / here
+URL = "http://www.yourpalaxl.com/callie_online" # No trailing / here
 
 def getFileDate(path: Path) -> datetime:
     relativePath = path.relative_to(REPOROOT).as_posix()
@@ -67,20 +67,13 @@ def main() -> None:
 
     comics.sort(key=lambda entry: (entry[0], entry[1].as_posix()), reverse=True)
 
-    rss = ET.Element("rss", {
-        "version": "2.0",
-        "xmlns:atom": "http://www.w3.org/2005/Atom",
-    })
+    rss = ET.Element("rss", {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = "Callie Online"
     ET.SubElement(channel, "link").text = URL + "/"
-    ET.SubElement(channel, "description").text = "Callie Online"
+    ET.SubElement(channel, "description").text = "The Vionan Route Of The Information Superhighway"
     ET.SubElement(channel, "language").text = "en-gb"
-    ET.SubElement(channel, "atom:link", {
-        "href": URL + "/feed.xml",
-        "rel": "self",
-        "type": "application/rss+xml",
-    })
+    ET.SubElement(channel, "atom:link", { "href": URL + "/callie_online/feed.xml", "rel": "self", "type": "application/rss+xml" } )
 
     if comics:
         ET.SubElement(channel, "lastBuildDate").text = format_datetime(max(date for date, _ in comics), usegmt=True)
@@ -93,22 +86,18 @@ def main() -> None:
         ET.SubElement(item, "link").text = url
         ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = url
         ET.SubElement(item, "pubDate").text = format_datetime(published, usegmt=True)
+        ET.SubElement(item, "author").text = "Axl Woodland"
         desc = (
             f'<p><a href="{html.escape(url, quote=True)}">'
             f'<img src="{html.escape(url, quote=True)}" '
             f'alt="{html.escape(title, quote=True)}"></a></p>'
         )
         ET.SubElement(item, "description").text = desc
-        ET.SubElement(item, "enclosure", {
-            "url": url,
-            "length": str(path.stat().st_size),
-                "type": getMimeType(path),
-            },
-        )
+        ET.SubElement(item, "enclosure", { "url": url, "length": str(path.stat().st_size), "type": getMimeType(path) })
 
     addIdent(rss)
     xml_body = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
-    outputFile = REPOROOT / "feed.xml"
+    outputFile = REPOROOT / "callie_online" / "feed.xml"
     outputFile.write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body + "\n",
         encoding="utf-8",
