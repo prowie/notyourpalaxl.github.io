@@ -28,7 +28,6 @@ def getFileDate(path: Path) -> datetime:
             return datetime.fromisoformat(dates[-1]).astimezone(timezone.utc)
     return datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
 
-
 def getComicTitle(path: Path) -> str:
     words = re.sub(r"[_-]+", " ", path.stem).strip()
     return words.title() or path.stem
@@ -36,6 +35,15 @@ def getComicTitle(path: Path) -> str:
 def getPublicURL(path: Path) -> str:
     relative = path.relative_to(REPOROOT).as_posix()
     return f"{URL}/{quote(relative, safe='/')}"
+
+def getMimeType(path: Path) -> str:
+    MIMETypes = {
+        ".gif": "image/gif",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg"
+    }
+    return MIMETypes[path.suffix.lower()]
 
 def addIdent(element: ET.Element, level: int = 0) -> None: # gotta have pretty feeds
     spacing = "\n" + "  " * level
@@ -94,8 +102,9 @@ def main() -> None:
         ET.SubElement(item, "enclosure", {
             "url": url,
             "length": str(path.stat().st_size),
-            "type": "image/gif",
-        })
+                "type": getMimeType(path),
+            },
+        )
 
     addIdent(rss)
     xml_body = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
