@@ -12,7 +12,7 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 REPOROOT = Path(__file__).resolve().parents[1]
-URL = "http://www.notyourpalaxl.com" # No trailing / here
+URL = "http://www.yourpalaxl.com" # No trailing / here
 
 def getFileDate(path: Path) -> datetime:
     relativePath = path.relative_to(REPOROOT).as_posix()
@@ -105,7 +105,7 @@ def main() -> None:
         encoding="utf-8",
         newline="\n",
     )
-    print(f"Generated {outputFile.relative_to(REPOROOT)} with {len(comics)} comic(s).")
+    print(f"Gen: {len(comics)}")
 
 
 if __name__ == "__main__":
