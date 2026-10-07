@@ -10,7 +10,7 @@ from urllib.parse import quote
 import xml.etree.ElementTree as ET
 
 REPOROOT = Path(__file__).resolve().parents[1]
-URL = "http://www.yourpalaxl.com/callie_online" # No trailing /
+URL = "http://www.yourpalaxl.com" # No trailing /
 
 def getFileDate(path: Path) -> datetime:
     relative = path.relative_to(REPOROOT).as_posix()
@@ -68,7 +68,7 @@ def main() -> None:
     rss = ET.Element("rss", {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = "Callie Online"
-    ET.SubElement(channel, "link").text = URL + "/"
+    ET.SubElement(channel, "link").text = URL + "/callie_online"
     ET.SubElement(channel, "description").text = "The Vionan Route Of The Information Superhighway"
     ET.SubElement(channel, "language").text = "en-gb"
     ET.SubElement(channel, "atom:link", { "href": URL + "/callie_online/feed.xml", "rel": "self", "type": "application/rss+xml" } )
