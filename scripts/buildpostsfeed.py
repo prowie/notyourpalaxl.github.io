@@ -12,9 +12,7 @@ from pathlib import Path
 from urllib.parse import quote, urljoin
 
 REPOROOT = Path(__file__).resolve().parents[1]
-OUTPUTFILE = REPOROOT / "posts.xml"
 URL = "http://www.yourpalaxl.com"  # No trailing slash
-
 
 class TitleParser(HTMLParser):
     def __init__(self) -> None:
@@ -142,15 +140,9 @@ def main() -> None:
     ET.SubElement(channel, "link").text = URL + "/posts/"
     ET.SubElement(channel, "description").text = "Live from the Cerestix System"
     ET.SubElement(channel, "language").text = "en-gb"
-    ET.SubElement(
-        channel,
-        "atom:link",
-        {
-            "href": URL + "/posts.xml",
-            "rel": "self",
-            "type": "application/rss+xml",
-        },
-    )
+    ET.SubElement(channel, "atom:link", {"href": URL + "/posts.xml", "rel": "self", "type": "application/rss+xml" })
+    author = ET.SubElement(channel, "atom:author")
+    ET.SubElement(author, "atom:name").text = "Axl Woodland"
 
     if posts:
         newestDate = max(postDate for postDate, _, _, _ in posts)
@@ -175,6 +167,7 @@ def main() -> None:
 
     addIndent(rss)
     xmlBody = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
+    OUTPUTFILE = REPOROOT / "posts.xml"
     OUTPUTFILE.write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n' + xmlBody + "\n",
         encoding="utf-8",
