@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f callie_online/feed.xml posts.xml
+          git add callie_online/feed.xml posts.xml
           if git diff --cached --quiet; then
             echo "feeds already done"
             exit 0
