@@ -53,8 +53,8 @@ def main() -> None:
     comics = []
     ARCHIVEROOT = REPOROOT / "callie_online" / "archive"
     if ARCHIVEROOT.exists():
-        for path in ARCHIVEROOT.glob("**/printable/*.gif"):
-            if path.is_file():
+        for path in ARCHIVEROOT.rglob("printable/*"):
+            if path.is_file() and path.suffix.lower() in {".gif", ".png", ".jpg"}:
                 comics.append((getFileDate(path), path))
 
     comics.sort(key=lambda entry: (entry[0], entry[1].as_posix()), reverse=True)
@@ -85,12 +85,12 @@ def main() -> None:
         ET.SubElement(item, "link").text = url
         ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = url
         ET.SubElement(item, "pubDate").text = format_datetime(published, usegmt=True)
-        description_html = (
+        desc = (
             f'<p><a href="{html.escape(url, quote=True)}">'
             f'<img src="{html.escape(url, quote=True)}" '
             f'alt="{html.escape(title, quote=True)}"></a></p>'
         )
-        ET.SubElement(item, "description").text = description_html
+        ET.SubElement(item, "description").text = desc
         ET.SubElement(item, "enclosure", {
             "url": url,
             "length": str(path.stat().st_size),
