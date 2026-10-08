@@ -15,41 +15,43 @@ URL = "http://www.yourpalaxl.com"  # No trailing
 
 class TitleParser(HTMLParser):
     def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
+        super().__init__()
         self.inTitle = False
-        self.foundTitle = False
-        self.titleParts: list[str] = []
+        self.title = ""
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if not self.foundTitle and tag.lower() == "title":
+        if tag == "title":
             self.inTitle = True
 
     def handle_endtag(self, tag: str) -> None:
-        if self.inTitle and tag.lower() == "title":
+        if tag == "title":
             self.inTitle = False
-            self.foundTitle = True
 
     def handle_data(self, data: str) -> None:
         if self.inTitle:
-            self.titleParts.append(data)
-
-    def getTitle(self) -> str:
-        return " ".join("".join(self.titleParts).split())
+            self.title += data
 
 def getGitDate(path: Path) -> datetime:
     relative = path.relative_to(REPOROOT).as_posix()
-    cmds = [
-        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relative],
-        ["git", "log", "--follow", "--format=%aI", "--", relative],
-    ]
 
-    for command in cmds:
-        result = subprocess.run(command, cwd=REPOROOT, check=False, capture_output=True, text=True)
-        dates = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-        if dates:
-            return datetime.fromisoformat(dates[-1])
+    def findGitDate(*arguments: str) -> datetime | None:
+        result = subprocess.run(["git", "log", "--follow", *arguments, "--format=%aI", "--", relative], cwd=REPOROOT, capture_output=True, text=True, check=False)
 
-    return datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+        dates = result.stdout.splitlines()
+        if not dates:
+            return None
+
+        return datetime.fromisoformat(dates[-1])
+
+    gitDate = findGitDate("--diff-filter=A")
+
+    if gitDate is None:
+        gitDate = findGitDate()
+
+    if gitDate is None:
+        gitDate = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+
+    return gitDate
 
 def getPostDate(path: Path) -> datetime:
     if not re.fullmatch(r"\d{6}", path.stem): # Axl uses DDMMYY for posts
@@ -67,17 +69,18 @@ def getPostDate(path: Path) -> datetime:
         tzinfo=gitDate.tzinfo,
     )
 
-def readPostSource(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8-sig")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="windows-1252")
-
 def getPostTitle(source: str, path: Path) -> str:
     parser = TitleParser()
     parser.feed(source)
     parser.close()
-    return parser.getTitle() or path.stem
+    title = " ".join(parser.title.split())
+    return title or path.stem
+
+def getPost(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError: # needed for 070625
+        return path.read_text(encoding="windows-1252")
 
 def getPublicURL(path: Path) -> str:
     relative = path.relative_to(REPOROOT).as_posix()
@@ -88,9 +91,9 @@ def getPostBody(source: str, postUrl: str) -> str:
     if not bodyStart:
         return ""
 
-    remainingSource = source[bodyStart.end():]
-    bodyEnd = re.search(r"</body\s*>", remainingSource, flags=re.IGNORECASE)
-    body = remainingSource[:bodyEnd.start()] if bodyEnd else remainingSource
+    theRest = source[bodyStart.end():]
+    bodyEnd = re.search(r"</body\s*>", theRest, flags=re.IGNORECASE)
+    body = theRest[:bodyEnd.start()] if bodyEnd else theRest
 
     def makeAbsolute(match: re.Match[str]) -> str:
         attribute, quoteMark, value = match.groups()
@@ -101,33 +104,21 @@ def getPostBody(source: str, postUrl: str) -> str:
     body = re.sub(r"(?i)\b(href|src|poster|background)\s*=\s*([\"'])(.*?)\2", makeAbsolute,body)
     return body.strip()
 
-def addIndent(element: ET.Element, level: int = 0) -> None: # gotta have pretty feeds
-    spacing = "\n" + "  " * level
-    if len(element):
-        if not element.text or not element.text.strip():
-            element.text = spacing + "  "
-        for child in element:
-            addIndent(child, level + 1)
-        if not child.tail or not child.tail.strip():
-            child.tail = spacing
-    if level and (not element.tail or not element.tail.strip()):
-        element.tail = spacing
-
 def main() -> None:
     posts: list[tuple[datetime, Path, str, str]] = []
-    postsRoot = REPOROOT / "posts"
-    if postsRoot.exists():
-        for path in postsRoot.iterdir():
+    postsdir = REPOROOT / "posts"
+    if postsdir.exists():
+        for path in postsdir.iterdir():
             if not path.is_file() or path.suffix.lower() not in {".htm", ".html"}:
                 continue
             try:
                 postDate = getPostDate(path)
                 postUrl = getPublicURL(path)
-                source = readPostSource(path)
+                source = getPost(path)
                 postTitle = getPostTitle(source, path)
                 postBody = getPostBody(source, postUrl)
             except (ValueError, OSError) as error:
-                print(f"Error for {path.relative_to(REPOROOT)}: {error}")
+                print(f"Error: {path.relative_to(REPOROOT)} {error}")
                 continue
             posts.append((postDate, path, postTitle, postBody))
 
@@ -162,10 +153,10 @@ def main() -> None:
             escapedTitle = html.escape(title)
             ET.SubElement(item, "description").text = (f'<p><a href="{escapedUrl}">{escapedTitle}</a></p>')
 
-    addIndent(rss)
-    xmlBody = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
+    ET.indent(rss, space="  ")
+    stringrss = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
     outputFile = REPOROOT / "posts.xml"
-    outputFile.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + xmlBody + "\n", encoding="utf-8", newline="\n")
+    outputFile.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + stringrss + "\n", encoding="utf-8", newline="\n")
     print(f"Gen: {len(posts)}")
 
 if __name__ == "__main__":

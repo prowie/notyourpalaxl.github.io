@@ -44,9 +44,9 @@ def getMimeType(path: Path) -> str:
 
 def main() -> None:
     comics = []
-    archiveRoot = REPOROOT / "callie_online" / "archive"
-    if archiveRoot.exists():
-        for path in archiveRoot.rglob("printable/*"):
+    archivedir = REPOROOT / "callie_online" / "archive"
+    if archivedir.exists():
+        for path in archivedir.rglob("printable/*"):
             if path.is_file() and path.suffix.lower() in {".gif", ".png", ".jpg"}:
                 comics.append((getFileDate(path), path))
 
