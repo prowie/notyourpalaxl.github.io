@@ -14,46 +14,33 @@ URL = "http://www.yourpalaxl.com" # No trailing /
 
 def getFileDate(path: Path) -> datetime:
     relative = path.relative_to(REPOROOT).as_posix()
-    cmds = [
-        ["git", "log", "--follow", "--diff-filter=A", "--format=%aI", "--", relative],
-        ["git", "log", "--follow", "--format=%aI", "--", relative],
-    ]
 
-    for command in cmds:
-        result = subprocess.run(command, cwd=REPOROOT, check=False, capture_output=True, text=True)
-        dates = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-        if dates:
-            return datetime.fromisoformat(dates[-1]).astimezone(timezone.utc)
-    return datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+    def getGitDate(*arguments: str) -> datetime | None:
+        output = subprocess.run(["git", "log", "--follow", *arguments, "--format=%aI", "--", relative], cwd=REPOROOT, capture_output=True, text=True, check=False)
 
-def getComicTitle(path: Path) -> str:
-    words = re.sub(r"[_-]+", " ", path.stem).strip()
-    return words.title() or path.stem
+        dates = output.stdout.splitlines()
+        if not dates:
+            return None
 
-def getPublicURL(path: Path) -> str:
-    relative = path.relative_to(REPOROOT).as_posix()
-    return f"{URL}/{quote(relative, safe='/')}"
+        return datetime.fromisoformat(dates[-1]).astimezone(timezone.utc) # last date output is oldest in the git log, so comics stay in the right order of creation
+
+    date = getGitDate("--diff-filter=A")
+    if date is None:
+        date = getGitDate()
+
+    if date is None:
+        date = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+
+    return date
 
 def getMimeType(path: Path) -> str:
-    MIMETypes = {
+    types = {
         ".gif": "image/gif",
         ".png": "image/png",
         ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg"
     }
-    return MIMETypes[path.suffix.lower()]
-
-def addIdent(element: ET.Element, level: int = 0) -> None: # gotta have pretty feeds
-    spacing = "\n" + "  " * level
-    if len(element):
-        if not element.text or not element.text.strip():
-            element.text = spacing + "  "
-        for child in element:
-            addIdent(child, level + 1)
-        if not child.tail or not child.tail.strip():
-            child.tail = spacing
-    if level and (not element.tail or not element.tail.strip()):
-        element.tail = spacing
+    return types[path.suffix.lower()]
 
 def main() -> None:
     comics = []
@@ -68,7 +55,7 @@ def main() -> None:
     rss = ET.Element("rss", {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"})
     channel = ET.SubElement(rss, "channel")
     ET.SubElement(channel, "title").text = "Callie Online"
-    ET.SubElement(channel, "link").text = URL + "/callie_online"
+    ET.SubElement(channel, "link").text = URL + "/callie_online/"
     ET.SubElement(channel, "description").text = "The Vionan Route Of The Information Superhighway"
     ET.SubElement(channel, "language").text = "en-gb"
     ET.SubElement(channel, "atom:link", { "href": URL + "/callie_online/feed.xml", "rel": "self", "type": "application/rss+xml" } )
@@ -79,24 +66,33 @@ def main() -> None:
         ET.SubElement(channel, "lastBuildDate").text = format_datetime(max(date for date, _ in comics), usegmt=True)
 
     for published, path in comics:
-        title = getComicTitle(path)
-        url = getPublicURL(path)
+        words = re.sub(r"[_-]+", " ", path.stem).strip()
+        title = words.title() or path.stem
+
+        relative = path.relative_to(REPOROOT).as_posix()
+        link = f"{URL}/{quote(relative, safe='/')}"
+
         item = ET.SubElement(channel, "item")
         ET.SubElement(item, "title").text = title
-        ET.SubElement(item, "link").text = url
-        ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = url
+        ET.SubElement(item, "link").text = link
+        ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = link
         ET.SubElement(item, "pubDate").text = format_datetime(published, usegmt=True)
+
         desc = (
-            f'<p><a href="{html.escape(url, quote=True)}">'
-            f'<img src="{html.escape(url, quote=True)}" '
-            f'alt="{html.escape(title, quote=True)}"></a></p>'
+            f'<p><a href="{html.escape(link, quote=True)}"><img src="{html.escape(link, quote=True)}"></a></p>'
         )
         ET.SubElement(item, "description").text = desc
-        ET.SubElement(item, "enclosure", { "url": url, "length": str(path.stat().st_size), "type": getMimeType(path) })
-    addIdent(rss)
-    xml_body = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
-    outputFile = REPOROOT / "callie_online" / "feed.xml"
-    outputFile.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body + "\n", encoding="utf-8", newline="\n")
+
+        ET.SubElement(item, "enclosure", {
+                "url": link,
+                "length": str(path.stat().st_size),
+                "type": getMimeType(path)
+            }
+        )
+    ET.indent(rss, space="  ")
+    stringrss = ET.tostring(rss, encoding="unicode", short_empty_elements=True)
+    output = REPOROOT / "callie_online" / "feed.xml"
+    output.write_text('<?xml version="1.0" encoding="UTF-8"?>\n' + stringrss + "\n", encoding="utf-8", newline="\n")
     print(f"Gen: {len(comics)}")
 
 if __name__ == "__main__":
