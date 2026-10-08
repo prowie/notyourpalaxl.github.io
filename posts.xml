@@ -9,7 +9,18 @@
     <atom:author>
       <atom:name>Axl Woodland</atom:name>
     </atom:author>
-    <lastBuildDate>Wed, 07 Oct 2026 11:22:40 -0400</lastBuildDate>
+    <lastBuildDate>Thu, 08 Oct 2026 14:45:32 -0400</lastBuildDate>
+    <item>
+      <title>Test 2</title>
+      <link>http://www.yourpalaxl.com/posts/081026.htm</link>
+      <guid isPermaLink="true">http://www.yourpalaxl.com/posts/081026.htm</guid>
+      <pubDate>Thu, 08 Oct 2026 14:45:32 -0400</pubDate>
+      <description>&lt;p&gt;&lt;i&gt;&lt;font face="Arial Black" size="7"&gt;News&lt;/font&gt;&lt;/i&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;&lt;font face="Arial Black" color="#FF6600"&gt;Test 2 
+Date: 8th October 2026&lt;/font&gt;&lt;/i&gt;&lt;/p&gt;
+&lt;p&gt;This is a second test, and hopefully final one.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.yourpalaxl.com/assets/Body/bodynews.htm"&gt;Other News...&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Test post</title>
       <link>http://www.yourpalaxl.com/posts/071026.htm</link>
