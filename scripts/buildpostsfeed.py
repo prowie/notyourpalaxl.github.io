@@ -74,6 +74,11 @@ def getPostTitle(source: str, path: Path) -> str:
     parser.feed(source)
     parser.close()
     title = " ".join(parser.title.split())
+    if path.name == "290526.htm":
+        title = "Site Updates"
+    elif path.name == "270726.htm":
+        title = "Fuck You, ByteDance! You can suck my-"
+
     return title or path.stem
 
 def getPost(path: Path) -> str:
