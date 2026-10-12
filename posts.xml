@@ -9,7 +9,111 @@
     <atom:author>
       <atom:name>Axl Woodland</atom:name>
     </atom:author>
-    <lastBuildDate>Sat, 10 Oct 2026 14:28:19 -0400</lastBuildDate>
+    <lastBuildDate>Sun, 11 Oct 2026 15:34:59 -0400</lastBuildDate>
+    <item>
+      <title>Turning a desktop into a IIGS and Amiga, in a loose term</title>
+      <link>http://www.yourpalaxl.com/posts/111026.htm</link>
+      <guid isPermaLink="true">http://www.yourpalaxl.com/posts/111026.htm</guid>
+      <pubDate>Sun, 11 Oct 2026 15:34:59 -0400</pubDate>
+      <description>&lt;p&gt;&lt;i&gt;&lt;font face="Arial Black" size="7"&gt;News&lt;/font&gt;&lt;/i&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;&lt;font face="Arial Black" color="#FF6600"&gt;Turning a desktop into a IIGS, 
+Amiga and Macintosh, in a loose term - Entry 
+Date: 11th October 2026&lt;/font&gt;&lt;/i&gt;&lt;/p&gt;
+&lt;p&gt;Day-Before-Yesterday (As of writing), I was just minding my own business and 
+it suddenly hit me. What If I made a drive that I could boot from that throws 
+you directly into a different completely unsupported OS? It's something I 
+technically done before with an old Lenovo Windows 10 laptop, where I used 
+VMWare Workstation's KVM feature and modified Windows 10's registry to have 
+VMWare KVM run immediately after login, instead of Explorer and the like. It was 
+surprisingly decent and I actually daily driven it until I was given my Inspiron 
+1545. I then upgraded (you heard me right) to that.&lt;/p&gt;
+&lt;p&gt;I thought that since it was decent with XP, why not go older? Say the 
+operating system of one of my all time fave machines, GS/OS? I've been getting 
+into the Amiga too, so maybe Workbench?&lt;br&gt;
+Why not this time, use a far more modular system than Windows? Say... Linux? I 
+remembered that in my PC sat an unplugged and unused Linux drive that was 
+collecting dust. I never used it because my experience (As a GTX 970) user was 
+absolutely terrible, so it couldn't even run the most basic 3D software. I kept 
+it around just in case I ever needed to use it, but a year later, I never did 
+need it. Just to be clear I haven't gone linux-less all this time, my home 
+server runs on it. So why not have this drive be my target?&lt;br&gt;
+&lt;br&gt;
+I started with the VERY tedious of setting up the dependencies and the 
+emulators. The dependencies were of course the biggest pain in the arse, because 
+it turned out one of the dependencies required I completely upgrade my Ubuntu 
+from 20.04 to 22.04. Got that done, and went on to set up the emulators. I got 
+GSPlus Legacy for the IIGS, and FS-UAE for the Amiga. Setting these up were as 
+you'd expect, and were nothing worth mentioning here. &lt;/p&gt;
+&lt;p&gt;Now it's time to get rid of the desktop, but there's an issue. The X-Window 
+system is required for launching the desktop... and the programs themselves, 
+meaning I won't be able to just simply launch them from the TTY mode. Doing 
+research, I found out that it's possible to disable the desktop and also screw 
+with the X-Window system (or whatever it's called) to just show the contents of 
+a singular program instead of having the entire desktop show. First, I figured 
+out that I was able to disable the normal Ubuntu boot and sign in screen by 
+opening &lt;font face="Courier New"&gt;&lt;b&gt;&lt;i&gt;/etc/default/grub&lt;/i&gt;&lt;/b&gt;&lt;/font&gt; in Nano 
+and changing &lt;b&gt;&lt;i&gt;&lt;font face="Courier New"&gt;GRUB_CMDLINE_LINUX_DEFAULT=&amp;quot;quiet 
+splash&amp;quot; &lt;/font&gt;&lt;/i&gt;&lt;/b&gt;to &lt;b&gt;&lt;i&gt;&lt;font face="Courier New"&gt;GRUB_CMDLINE_LINUX_DEFAULT="text&amp;quot;&lt;/font&gt;&lt;/i&gt;&lt;/b&gt;. 
+I then updated grub by executing &lt;b&gt;&lt;i&gt;&lt;font face="Courier New"&gt;sudo update-grub&lt;/font&gt;&lt;/i&gt;&lt;/b&gt;. 
+I gave it it a reboot, and a good sign, I was immediately given a verbose boot, 
+and a command-line based login field, however the it was now time for the 
+desktop. I did so by executing &lt;i&gt;&lt;b&gt;&lt;font face="Courier New"&gt;sudo systemctl set-default multi-user.target&lt;/font&gt;&lt;/b&gt;&lt;/i&gt;. I gave it another reboot and signed in, and yes! I was thrown into the tty1 command line!&lt;br&gt;
+&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Now that I have the system boot into tty, a new question is that what If I 
+needed something that required the desktop? Good news is that I could still get 
+to the desktop by two ways either running &lt;i&gt;&lt;b&gt;&lt;font face="Courier New"&gt;startx&lt;/font&gt;&lt;/b&gt;&lt;/i&gt; 
+as sudo (Don't do this), or just simply make a new user account and use it 
+exclusively for the desktop. This is of course the much safer method. Now to 
+modify the system to show a 2 choice question. on whether to boot GS/OS or 
+Workbench. This could be done by opening /etc/profile in Nano and directly 
+inserting the script there. While, yes, this has it apply for every user 
+account, you can just simply CTRL+C out of it. Then you have to have the 
+X-Window system display your wanted window. This is actually far easier than I 
+thought, as all I had to do to accomplish this was by creating a &amp;quot;.xinitrc&amp;quot; file 
+in your user root (/home/username). In this file, you should type &lt;b&gt;&lt;i&gt;
+&lt;font face="Courier New"&gt;&amp;quot;exec path/to/your/emulator executable&amp;quot; &lt;/font&gt;&lt;/i&gt;&lt;/b&gt;
+and save it. To test this works, then type &lt;b&gt;&lt;i&gt;&lt;font face="Courier New"&gt;startx&lt;/font&gt;&lt;/i&gt;&lt;/b&gt; 
+and execute it. If it's gone well, you should be greeted with your program 
+instead of your desktop. Just be aware that you may have some trouble operating 
+and returning to the command line depending on your program. An example of this 
+is how you shouldn't use GSPlus in fullscreen mode like this. For me this would 
+cause the keyboard to stop functioning, preventing me from Alt+F4'ing out of the 
+program. I fixed this by giving GSPlus launch arguments that will launch it in 
+borderless window mode at my native desktop resolution. Switching to a different 
+TTY should still work though.&lt;/p&gt;
+&lt;p&gt;This of course raises a different question. If a single file is required to 
+launch an emulator, then how can you have it launch a different emulator? 
+Truthfully, I didn't figure this out properly, but I did find a way. I remedied 
+this issue by just making a repository that has copies of the ./xinitrc but 
+pointing to different emulators. I then implemented commands into my 
+/etc/profile choice script that just swapped the files out on the fly, depending 
+on which system you chosen.&lt;/p&gt;
+&lt;p&gt;Be aware that not all emulators will enjoy being the only thing running in 
+the X-Window system. This is why I use GSPlus legacy. The newer SDL3 based... &lt;i&gt;
+AI SLOP!&lt;/i&gt; version of GSPlus does have benefits, such as a CRT filter, 
+smoother mouse and a sharper scaling method, but it's still not worth it. After 
+all whatever scaling method the SDL3 version uses tends to mess up things like 
+vertical line patterns, which are quite numerous across GS/OS, from hard disk 
+icons to the default background itself.&lt;/p&gt;
+&lt;p&gt;The next day I decided to give the Apple Macintosh a shot too, but obviously 
+the default MiniVMac won't be very nice to use here. So I decided to look into 
+the program's site, and noticed that the available source code allowed you to 
+compile MiniVMac as different Macintosh models, while also forcing it into 
+different resolutions. I compiled it for the Plus, SE FDHD and II models, while 
+also giving it the fullscreen and iid flags. The iid flags allow for you to 
+mount a disk labled disk(1-9).dsk by pressing CTRL+(0-9). This gave the 
+unexpected result of System 7 automounting, so happy days! I also gave it a shot 
+at full 1080p. While it ran perfectly (fair play), everything was still 
+expectedly tiny. I then remembered that MVM's magnify method is pretty decent, 
+and doesn't have it lose sharpness, so I compiled it at half 1080p resolution 
+instead. Implementing these were not a tedious process as most of the hard work 
+was already done.&lt;/p&gt;
+&lt;p&gt;If you wanna watch it in action, check
+&lt;a target="_blank" href="https://youtu.be/vWYOmjKfmgc"&gt;here!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;
+&lt;br&gt;
+&lt;a href="http://www.yourpalaxl.com/assets/Body/bodynews.htm"&gt;Other News...&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Today is 10 10 2026!</title>
       <link>http://www.yourpalaxl.com/posts/101026.htm</link>
